@@ -48,10 +48,11 @@ class LiveCut {
     _renderIframe(diffContent, geometry) {
         this.diffInstance = document.createElement('iframe');
         this.diffInstance.src = diffContent;
+        this.diffInstance.frameBorder = '0';
 
         if (geometry) {
             this.setDesignGeometry(geometry);
-            this.diffInstance.style.cssText = `display: block;width: ${geometry.w}px;height:${geometry.h}px;overflow: hidden;`;
+            this.diffInstance.style.cssText = `display: block;width: ${geometry.w}px;height:${geometry.h}px;overflow: hidden;border:none`;
         } else {
             throw TypeError('Missing `geometry` parameter.');
         }
@@ -59,7 +60,7 @@ class LiveCut {
 
     setDesignGeometry(geometry) {
         this.maxExpand = this.handleWidth + geometry.w;
-        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden`;
+        this.handleBox.style.cssText = `position:absolute;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
         this.handle.style.cssText = `position:absolute;top:0;right:0;background-color:#333333;height:${geometry.h}px;width:5px;cursor:col-resize;user-select: none;-webkit-user-drag: none;`;
         this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
@@ -90,13 +91,16 @@ class LiveCut {
     };
 
     appendBody() {
+        document.head.append('<style>.clear-collapse::before { content: "";display: table; }</style>');
         this.handleBox.append(this.mask);
         this.handleBox.append(this.diffInstance);
         this.handleBox.append(this.handle);
         document.body.append(this.handleBox);
+        document.body.classList.add('clear-collapse');
     }
 
     destroy() {
         this.handleBox.remove();
+        document.body.classList.add('clear-collapse');
     }
 }
