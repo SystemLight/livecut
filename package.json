@@ -1,0 +1,22 @@
+{
+  "name": "livecut",
+  "version": "1.0.0",
+  "scripts": {},
+  "keywords": [
+    "live",
+    "cut",
+    "draw"
+  ],
+  "description": "Real time design drawing comparison web tool.",
+  "main": "index.js",
+  "author": "SystemLight",
+  "license": "MIT",
+  "homepage": "https://github.com/SystemLight/livecut#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SystemLight/livecut.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SystemLight/livecut/issues"
+  }
+}
