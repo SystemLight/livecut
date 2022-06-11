@@ -9,6 +9,9 @@
   ],
   "description": "Real time design drawing comparison web tool.",
   "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "author": "SystemLight",
   "license": "MIT",
   "homepage": "https://github.com/SystemLight/livecut#readme",
