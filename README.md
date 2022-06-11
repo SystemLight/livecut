@@ -2,6 +2,11 @@
 
 > 轻量的网页切图设计稿对比工具
 
+### 使用示例
+
+![tian](./docs/tian.gif)
+
+![baoxiaohe](./docs/baoxiaohe.gif)
 
 ### 引入方法
 
