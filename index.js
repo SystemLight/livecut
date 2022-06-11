@@ -1,70 +1,92 @@
 class LiveCut {
-    constructor(designImagePath, geometry) {
-        this.handleBox = document.createElement("div");
-        this.handle = document.createElement("div");
-        this.cutCanvas = document.createElement("canvas");
-        this.ctx = this.cutCanvas.getContext("2d");
+    constructor(diffContent, geometry) {
+        this.handleBox = document.createElement('div'); // 伸缩盒子
+        this.handle = document.createElement('div'); // 控制把手
+        this.diffInstance = null; // 对比实例对象
 
-        this.startX = 0;
-        this.handleWidth = 5;
-        this.maxMoveWidth = 0;
+        this.startX = 0; // 开始坐标
+        this.handleWidth = 5; // 控制把手宽度
+        this.maxExpand = 0; // 最大展开距离
 
-        if (geometry) {
-            this.img = new Image(geometry.w, geometry.h);
-            this.img.src = designImagePath;
-            this.setDesignGeometry(geometry);
-            this.img.onload = () => {
-                this.ctx.drawImage(this.img, 0, 0, geometry.w, geometry.h);
-            };
+        if (diffContent instanceof Image) {
+            this._renderImage(diffContent, geometry);
+        } else if (typeof diffContent === 'string') {
+            this._renderIframe(diffContent, geometry);
         } else {
-            this.img = new Image();
-            this.img.src = designImagePath;
-            this.img.onload = () => {
-                this.setDesignGeometry({
-                    w: this.img.width,
-                    h: this.img.height,
-                });
-                this.ctx.drawImage(this.img, 0, 0);
-            };
+            throw TypeError('diffContent is not support.');
         }
 
-        this.handle.addEventListener("mousedown", this.handleDown);
+        this.handle.addEventListener('mousedown', this.handleDown);
         this.appendBody();
     }
 
+    _renderImage(diffContent, geometry) {
+        this.diffInstance = document.createElement('canvas');
+        let ctx = this.diffInstance.getContext('2d');
+
+        if (geometry) {
+            this.setDesignGeometry(geometry);
+            this.diffInstance.width = geometry.w;
+            this.diffInstance.height = geometry.h;
+            diffContent.onload = () => {
+                ctx.drawImage(diffContent, 0, 0, geometry.w, geometry.h);
+            };
+        } else {
+            diffContent.onload = () => {
+                this.setDesignGeometry({
+                    w: diffContent.width,
+                    h: diffContent.height
+                });
+                this.diffInstance.width = diffContent.width;
+                this.diffInstance.height = diffContent.height;
+                ctx.drawImage(diffContent, 0, 0);
+            };
+        }
+    }
+
+    _renderIframe(diffContent, geometry) {
+        this.diffInstance = document.createElement('iframe');
+        this.diffInstance.src = diffContent;
+
+        if (geometry) {
+            this.setDesignGeometry(geometry);
+            this.diffInstance.style.cssText = `display: block;width: ${geometry.w}px;height:${geometry.h}px;overflow: hidden;`;
+        } else {
+            throw TypeError('Missing `geometry` parameter.');
+        }
+    }
+
     setDesignGeometry(geometry) {
-        this.maxMoveWidth = this.handleWidth + geometry.w;
-        this.cutCanvas.width = geometry.w;
-        this.cutCanvas.height = geometry.h;
-        this.cutCanvas.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
+        this.maxExpand = this.handleWidth + geometry.w;
         this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;background-color:#333333;height:${geometry.h}px;width:5px;cursor:col-resize;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;background-color:#333333;height:${geometry.h}px;width:5px;cursor:col-resize;user-select: none;-webkit-user-drag: none;`;
+        this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
     }
 
     handleDown = (e) => {
-        document.removeEventListener("mousemove", this.handleMove);
-        document.removeEventListener("mouseup", this.handleUp);
         this.startX = e.clientX;
-        document.addEventListener("mousemove", this.handleMove);
-        document.addEventListener("mouseup", this.handleUp);
+        document.removeEventListener('mousemove', this.handleMove);
+        document.removeEventListener('mouseup', this.handleUp);
+        document.addEventListener('mousemove', this.handleMove);
+        document.addEventListener('mouseup', this.handleUp);
     };
 
     handleMove = (e) => {
-        let moveWidth = this.handleWidth + (e.clientX - this.startX);
-        if (moveWidth > this.maxMoveWidth) {
-            moveWidth = this.maxMoveWidth;
+        let currentExpand = this.handleWidth + (e.clientX - this.startX);
+        if (currentExpand > this.maxExpand) {
+            currentExpand = this.maxExpand;
         }
-        this.handleBox.style.width = `${moveWidth}px`;
+        this.handleBox.style.width = `${currentExpand}px`;
     };
 
     handleUp = () => {
-        document.removeEventListener("mousemove", this.handleMove);
-        document.removeEventListener("mouseup", this.handleUp);
+        document.removeEventListener('mousemove', this.handleMove);
+        document.removeEventListener('mouseup', this.handleUp);
         this.handleBox.style.width = `${this.handleWidth}px`;
     };
 
     appendBody() {
-        this.handleBox.append(this.cutCanvas);
+        this.handleBox.append(this.diffInstance);
         this.handleBox.append(this.handle);
         document.body.append(this.handleBox);
     }
