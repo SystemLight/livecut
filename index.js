@@ -2,8 +2,8 @@ class LiveCut {
     constructor(diffContent, geometry) {
         this.handleBox = document.createElement('div'); // 伸缩盒子
         this.handle = document.createElement('div'); // 控制把手
-        this.diffInstance = null; // 对比实例对象
         this.mask = document.createElement('div');
+        this.diffInstance = null; // 对比实例对象
 
         this.startX = 0; // 开始坐标
         this.handleWidth = 5; // 控制把手宽度
@@ -60,9 +60,9 @@ class LiveCut {
 
     setDesignGeometry(geometry) {
         this.maxExpand = this.handleWidth + geometry.w;
-        this.handleBox.style.cssText = `position:absolute;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden`;
+        this.handleBox.style.cssText = `position:absolute;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;background-color:#333333;height:${geometry.h}px;width:5px;cursor:col-resize;user-select: none;-webkit-user-drag: none;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);height:${geometry.h}px;width:5px;cursor:col-resize;`;
         this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
     }
 
