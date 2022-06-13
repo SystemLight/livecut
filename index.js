@@ -59,8 +59,8 @@ class LiveCut {
     }
 
     setDesignGeometry(geometry) {
-        this.maxExpand = this.handleWidth + geometry.w;
-        this.handleBox.style.cssText = `position:absolute;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
+        this.maxExpand = geometry.w;
+        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
         this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);height:${geometry.h}px;width:5px;cursor:col-resize;`;
         this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
@@ -68,6 +68,8 @@ class LiveCut {
 
     handleDown = (e) => {
         this.startX = e.clientX;
+        this.handle.style.width = '1px';
+        this.diffInstance.style.transform = `translate(-${window.scrollX}px,-${window.scrollY}px)`;
         document.removeEventListener('mousemove', this.handleMove);
         document.removeEventListener('mouseup', this.handleUp);
         document.addEventListener('mousemove', this.handleMove);
@@ -75,28 +77,32 @@ class LiveCut {
     };
 
     handleMove = (e) => {
-        let currentExpand = this.handleWidth + (e.clientX - this.startX);
+        let currentExpand = e.clientX - this.startX;
         if (currentExpand > this.maxExpand) {
             currentExpand = this.maxExpand;
         }
+
+        if (currentExpand < this.handleWidth) {
+            currentExpand = this.handleWidth;
+        }
+
         this.handleBox.style.width = `${currentExpand}px`;
-        this.mask.style.width = `${currentExpand - this.handleWidth}px`;
+        this.mask.style.width = `${currentExpand - 1}px`;
     };
 
     handleUp = () => {
         document.removeEventListener('mousemove', this.handleMove);
         document.removeEventListener('mouseup', this.handleUp);
         this.handleBox.style.width = `${this.handleWidth}px`;
-        this.mask.style.width = 0;
+        this.mask.style.width = '0';
+        this.handle.style.width = '5px';
     };
 
     appendBody() {
-        document.head.append('<style>.clear-collapse::before { content: "";display: table; }</style>');
         this.handleBox.append(this.mask);
         this.handleBox.append(this.diffInstance);
         this.handleBox.append(this.handle);
         document.body.append(this.handleBox);
-        document.body.classList.add('clear-collapse');
     }
 
     destroy() {
