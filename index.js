@@ -106,7 +106,7 @@ class LiveCut {
         this.maxExpand = geometry.w;
         this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);background-clip:content-box;;height:${geometry.h}px;width:5px;cursor:col-resize;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;width:5px;height:${geometry.h}px;cursor:col-resize;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D) content-box;`;
         this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
     }
 
@@ -128,12 +128,10 @@ class LiveCut {
     }
 
     refineHandle() {
-        this.handle.style.width = '1px';
         this.handle.style.paddingLeft = '4px';
     }
 
     resetHandle() {
-        this.handle.style.width = '5px';
         this.handle.style.removeProperty('padding-left');
     }
 
