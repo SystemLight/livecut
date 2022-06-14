@@ -2,14 +2,14 @@ class LiveCut {
     constructor(diffContent, geometry) {
         this.handleBox = document.createElement('div'); // 伸缩盒子
         this.handle = document.createElement('div'); // 控制把手
-        this.mask = document.createElement('div');
+        this.mask = document.createElement('div'); // 遮罩层，防止事件传出
         this.diffInstance = null; // 对比实例对象
-
-        this.isPersist = false;
-        this.startX = 0; // 开始坐标
+        this.isPersist = false; // 是否持久展开
+        this.startX = 0; // 鼠标按下的开始坐标
         this.handleWidth = 5; // 控制把手宽度
-        this.currentFoldSize = this.handleWidth;
-        this.maxExpand = 0; // 最大展开距离
+        this.currentFoldSize = this.handleWidth; // 当前展开的宽度
+        this.width = null; // 设计图宽度
+        this.height = null; // 设计图高度
 
         if (diffContent instanceof Image) {
             this._renderImage(diffContent, geometry);
@@ -74,7 +74,7 @@ class LiveCut {
     _handleDown = (e) => {
         this.isPersist = e.button === 2;
         this.startX = e.clientX - this.currentFoldSize;
-        this.diffInstance.style.transform = `translate(-${window.scrollX}px,-${window.scrollY}px)`;
+        this.offsetDesignView(-window.screenX, -window.screenY);
         this.refineHandle();
         this.unbindHandle();
         this.bindHandle();
@@ -92,6 +92,10 @@ class LiveCut {
         this.unbindHandle();
     };
 
+    offsetDesignView(x, y) {
+        this.diffInstance.style.transform = `translate(${x}px,${y}px)`;
+    }
+
     bindHandle() {
         document.addEventListener('mousemove', this._handleMove);
         document.addEventListener('mouseup', this._handleUp);
@@ -103,7 +107,8 @@ class LiveCut {
     }
 
     setDesignGeometry(geometry) {
-        this.maxExpand = geometry.w;
+        this.width = geometry.w;
+        this.height = geometry.h;
         this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
         this.handle.style.cssText = `position:absolute;top:0;right:0;width:5px;height:${geometry.h}px;cursor:col-resize;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D) content-box;`;
@@ -116,8 +121,8 @@ class LiveCut {
     }
 
     _fold(size) {
-        if (size > this.maxExpand) {
-            size = this.maxExpand;
+        if (size > this.width) {
+            size = this.width;
         } else if (size < this.handleWidth) {
             size = this.handleWidth;
         }
@@ -128,7 +133,7 @@ class LiveCut {
     }
 
     refineHandle() {
-        this.handle.style.paddingLeft = '4px';
+        this.handle.style.paddingLeft = `${this.handleWidth - 1}px`;
     }
 
     resetHandle() {
