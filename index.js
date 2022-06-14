@@ -5,8 +5,10 @@ class LiveCut {
         this.mask = document.createElement('div');
         this.diffInstance = null; // 对比实例对象
 
+        this.isPersist = false;
         this.startX = 0; // 开始坐标
         this.handleWidth = 5; // 控制把手宽度
+        this.currentFoldSize = this.handleWidth;
         this.maxExpand = 0; // 最大展开距离
 
         if (diffContent instanceof Image) {
@@ -18,6 +20,7 @@ class LiveCut {
         }
 
         this.handle.addEventListener('mousedown', this._handleDown);
+        this.handle.addEventListener('contextmenu', (e) => e.preventDefault());
         this.appendBody();
     }
 
@@ -69,31 +72,28 @@ class LiveCut {
     }
 
     _handleDown = (e) => {
-        this.startX = e.clientX;
-        this.handle.style.width = '1px';
+        if (e.button === 2) {
+            this.isPersist = true;
+        } else {
+            this.isPersist = false;
+        }
+
+        this.startX = e.clientX - this.currentFoldSize;
         this.diffInstance.style.transform = `translate(-${window.scrollX}px,-${window.scrollY}px)`;
+        this.refineHandle();
         this.unbindHandle();
         this.bindHandle();
     };
 
     _handleMove = (e) => {
-        let currentExpand = e.clientX - this.startX;
-        if (currentExpand > this.maxExpand) {
-            currentExpand = this.maxExpand;
-        }
-
-        if (currentExpand < this.handleWidth) {
-            currentExpand = this.handleWidth;
-        }
-
-        this.handleBox.style.width = `${currentExpand}px`;
-        this.mask.style.width = `${currentExpand - 1}px`;
+        this._fold(e.clientX - this.startX);
     };
 
     _handleUp = () => {
-        this.handleBox.style.width = `${this.handleWidth}px`;
-        this.mask.style.width = '0';
-        this.handle.style.width = '5px';
+        if (!this.isPersist) {
+            this._fold(0);
+            this.resetHandle();
+        }
         this.unbindHandle();
     };
 
@@ -111,8 +111,35 @@ class LiveCut {
         this.maxExpand = geometry.w;
         this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);height:${geometry.h}px;width:5px;cursor:col-resize;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);background-clip:content-box;;height:${geometry.h}px;width:5px;cursor:col-resize;`;
         this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
+    }
+
+    fold(size) {
+        this.refineHandle();
+        this._fold(size);
+    }
+
+    _fold(size) {
+        if (size > this.maxExpand) {
+            size = this.maxExpand;
+        } else if (size < this.handleWidth) {
+            size = this.handleWidth;
+        }
+
+        this.currentFoldSize = size;
+        this.handleBox.style.width = `${size}px`;
+        this.mask.style.width = `${size - this.handleWidth}px`;
+    }
+
+    refineHandle() {
+        this.handle.style.width = '1px';
+        this.handle.style.paddingLeft = '4px';
+    }
+
+    resetHandle() {
+        this.handle.style.width = '5px';
+        this.handle.style.removeProperty('padding-left');
     }
 
     appendBody() {
