@@ -17,7 +17,7 @@ class LiveCut {
             throw TypeError('diffContent is not support.');
         }
 
-        this.handle.addEventListener('mousedown', this.handleDown);
+        this.handle.addEventListener('mousedown', this._handleDown);
         this.appendBody();
     }
 
@@ -25,6 +25,10 @@ class LiveCut {
         let img = new Image();
         img.src = imgPath;
         return new LiveCut(img, geometry);
+    }
+
+    static iframe(urlPath, geometry) {
+        return new LiveCut(urlPath, geometry);
     }
 
     _renderImage(diffContent, geometry) {
