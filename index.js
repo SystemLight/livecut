@@ -72,12 +72,7 @@ class LiveCut {
     }
 
     _handleDown = (e) => {
-        if (e.button === 2) {
-            this.isPersist = true;
-        } else {
-            this.isPersist = false;
-        }
-
+        this.isPersist = e.button === 2;
         this.startX = e.clientX - this.currentFoldSize;
         this.diffInstance.style.transform = `translate(-${window.scrollX}px,-${window.scrollY}px)`;
         this.refineHandle();
