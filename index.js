@@ -21,6 +21,12 @@ class LiveCut {
         this.appendBody();
     }
 
+    static img(imgPath, geometry) {
+        let img = new Image();
+        img.src = imgPath;
+        return new LiveCut(img, geometry);
+    }
+
     _renderImage(diffContent, geometry) {
         this.diffInstance = document.createElement('canvas');
         let ctx = this.diffInstance.getContext('2d');
@@ -58,25 +64,15 @@ class LiveCut {
         }
     }
 
-    setDesignGeometry(geometry) {
-        this.maxExpand = geometry.w;
-        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
-        this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);height:${geometry.h}px;width:5px;cursor:col-resize;`;
-        this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
-    }
-
-    handleDown = (e) => {
+    _handleDown = (e) => {
         this.startX = e.clientX;
         this.handle.style.width = '1px';
         this.diffInstance.style.transform = `translate(-${window.scrollX}px,-${window.scrollY}px)`;
-        document.removeEventListener('mousemove', this.handleMove);
-        document.removeEventListener('mouseup', this.handleUp);
-        document.addEventListener('mousemove', this.handleMove);
-        document.addEventListener('mouseup', this.handleUp);
+        this.unbindHandle();
+        this.bindHandle();
     };
 
-    handleMove = (e) => {
+    _handleMove = (e) => {
         let currentExpand = e.clientX - this.startX;
         if (currentExpand > this.maxExpand) {
             currentExpand = this.maxExpand;
@@ -90,13 +86,30 @@ class LiveCut {
         this.mask.style.width = `${currentExpand - 1}px`;
     };
 
-    handleUp = () => {
-        document.removeEventListener('mousemove', this.handleMove);
-        document.removeEventListener('mouseup', this.handleUp);
+    _handleUp = () => {
         this.handleBox.style.width = `${this.handleWidth}px`;
         this.mask.style.width = '0';
         this.handle.style.width = '5px';
+        this.unbindHandle();
     };
+
+    bindHandle() {
+        document.addEventListener('mousemove', this._handleMove);
+        document.addEventListener('mouseup', this._handleUp);
+    }
+
+    unbindHandle() {
+        document.removeEventListener('mousemove', this._handleMove);
+        document.removeEventListener('mouseup', this._handleUp);
+    }
+
+    setDesignGeometry(geometry) {
+        this.maxExpand = geometry.w;
+        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
+        this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D);height:${geometry.h}px;width:5px;cursor:col-resize;`;
+        this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
+    }
 
     appendBody() {
         this.handleBox.append(this.mask);
@@ -107,6 +120,5 @@ class LiveCut {
 
     destroy() {
         this.handleBox.remove();
-        document.body.classList.add('clear-collapse');
     }
 }
