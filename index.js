@@ -1,4 +1,6 @@
 class LiveCut {
+    static geometryConfig = '目标浏览器控制台输入：{w:document.body.scrollWidth,h:document.body.scrollHeight}';
+
     constructor(diffContent, geometry) {
         this.handleBox = document.createElement('div'); // 伸缩盒子
         this.handle = document.createElement('div'); // 控制把手
@@ -10,6 +12,8 @@ class LiveCut {
         this.currentFoldSize = this.handleWidth; // 当前展开的宽度
         this.width = null; // 设计图宽度
         this.height = null; // 设计图高度
+        this.type = null; // 渲染类型
+        this._isBindWindowScroll = false; // 是否绑定了window滚动事件
 
         if (diffContent instanceof Image) {
             this._renderImage(diffContent, geometry);
@@ -24,6 +28,39 @@ class LiveCut {
         this.appendBody();
     }
 
+    _handleWindowScroll = (e) => {
+        console.log(e);
+        this.offsetDesignView(-window.scrollX, -window.scrollY);
+    };
+
+    _handleDown = (e) => {
+        this.isPersist = e.button === 2;
+        if (this.isPersist) {
+            this.bindWindowScroll();
+        }
+        this.startX = e.clientX - this.currentFoldSize;
+        this.setOpacity(1);
+        this.offsetDesignView(-window.scrollX, -window.scrollY);
+        this.refineHandle();
+        this.unbindHandle();
+        this.bindHandle();
+    };
+
+    _handleMove = (e) => {
+        this._fold(e.clientX - this.startX);
+    };
+
+    _handleUp = () => {
+        if (this.isPersist) {
+            this.setOpacity(0.3);
+        } else {
+            this._fold(0);
+            this.resetHandle();
+            this.unbindWindowScroll();
+        }
+        this.unbindHandle();
+    };
+
     static img(imgPath, geometry) {
         let img = new Image();
         img.src = imgPath;
@@ -35,6 +72,7 @@ class LiveCut {
     }
 
     _renderImage(diffContent, geometry) {
+        this.type = 'img';
         this.diffInstance = document.createElement('canvas');
         let ctx = this.diffInstance.getContext('2d');
 
@@ -59,6 +97,7 @@ class LiveCut {
     }
 
     _renderIframe(diffContent, geometry) {
+        this.type = 'iframe';
         this.diffInstance = document.createElement('iframe');
         this.diffInstance.src = diffContent;
         this.diffInstance.frameBorder = '0';
@@ -71,39 +110,8 @@ class LiveCut {
         }
     }
 
-    _handleDown = (e) => {
-        this.isPersist = e.button === 2;
-        this.startX = e.clientX - this.currentFoldSize;
-        this.offsetDesignView(-window.screenX, -window.screenY);
-        this.refineHandle();
-        this.unbindHandle();
-        this.bindHandle();
-    };
-
-    _handleMove = (e) => {
-        this._fold(e.clientX - this.startX);
-    };
-
-    _handleUp = () => {
-        if (!this.isPersist) {
-            this._fold(0);
-            this.resetHandle();
-        }
-        this.unbindHandle();
-    };
-
-    offsetDesignView(x, y) {
-        this.diffInstance.style.transform = `translate(${x}px,${y}px)`;
-    }
-
-    bindHandle() {
-        document.addEventListener('mousemove', this._handleMove);
-        document.addEventListener('mouseup', this._handleUp);
-    }
-
-    unbindHandle() {
-        document.removeEventListener('mousemove', this._handleMove);
-        document.removeEventListener('mouseup', this._handleUp);
+    setOpacity(opacity) {
+        this.diffInstance.style.opacity = opacity;
     }
 
     setDesignGeometry(geometry) {
@@ -113,6 +121,10 @@ class LiveCut {
         this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100001;width:${this.handleWidth}px;height:${this.height}px;`;
         this.handle.style.cssText = `position:absolute;top:0;right:0;z-index:100002;box-sizing:border-box;width:${this.handleWidth}px;height:${this.height}px;cursor:col-resize;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D) content-box;`;
         this.diffInstance.style.cssText = `width:${this.width}px;height:${this.height}px`;
+    }
+
+    offsetDesignView(x, y) {
+        this.diffInstance.style.transform = `translate(${x}px,${y}px)`;
     }
 
     fold(size) {
@@ -138,6 +150,28 @@ class LiveCut {
 
     resetHandle() {
         this.handle.style.removeProperty('padding-left');
+    }
+
+    bindHandle() {
+        document.addEventListener('mousemove', this._handleMove);
+        document.addEventListener('mouseup', this._handleUp);
+    }
+
+    unbindHandle() {
+        document.removeEventListener('mousemove', this._handleMove);
+        document.removeEventListener('mouseup', this._handleUp);
+    }
+
+    bindWindowScroll() {
+        if (!this._isBindWindowScroll) {
+            window.addEventListener('scroll', this._handleWindowScroll);
+            this._isBindWindowScroll = true;
+        }
+    }
+
+    unbindWindowScroll() {
+        window.removeEventListener('scroll', this._handleWindowScroll);
+        this._isBindWindowScroll = false;
     }
 
     appendBody() {
