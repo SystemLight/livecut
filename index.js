@@ -109,10 +109,10 @@ class LiveCut {
     setDesignGeometry(geometry) {
         this.width = geometry.w;
         this.height = geometry.h;
-        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:99999;width:5px;height:${geometry.h}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
-        this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100000;width:0;height:${geometry.h}px;`;
-        this.handle.style.cssText = `position:absolute;top:0;right:0;width:5px;height:${geometry.h}px;cursor:col-resize;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D) content-box;`;
-        this.diffInstance.style.cssText = `width:${geometry.w}px;height:${geometry.h}px`;
+        this.handleBox.style.cssText = `position:fixed;left:0;top:0;z-index:100000;width:${this.handleWidth}px;height:${this.height}px;overflow:hidden;user-select: none;-webkit-user-drag: none;`;
+        this.mask.style.cssText = `position:absolute;left:0;top:0;z-index:100001;width:${this.handleWidth}px;height:${this.height}px;`;
+        this.handle.style.cssText = `position:absolute;top:0;right:0;z-index:100002;box-sizing:border-box;width:${this.handleWidth}px;height:${this.height}px;cursor:col-resize;background:linear-gradient(#00022E,#4984B8,#82A67D,#3E82FC,#26F7FD,#070D0D) content-box;`;
+        this.diffInstance.style.cssText = `width:${this.width}px;height:${this.height}px`;
     }
 
     fold(size) {
@@ -129,7 +129,7 @@ class LiveCut {
 
         this.currentFoldSize = size;
         this.handleBox.style.width = `${size}px`;
-        this.mask.style.width = `${size - this.handleWidth}px`;
+        this.mask.style.width = `${size}px`;
     }
 
     refineHandle() {
