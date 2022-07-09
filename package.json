@@ -1,25 +1,66 @@
 {
   "name": "livecut",
-  "version": "1.3.0",
-  "scripts": {},
+  "version": "2.0.0",
+  "scripts": {
+    "lint:prettier": "prettier src/ -w",
+    "lint:eslint-check": "eslint src/ --ext .jsx,.js,ts,tsx",
+    "lint:eslint": "eslint src/ --ext .jsx,.js,ts,tsx --fix",
+    "build:tsc": "tsc -b",
+    "build:babel": "babel src/ -d dist/ -s",
+    "build:webpack": "webpack --mode production",
+    "build:webpack-dev": "webpack --mode development",
+    "dev:serve": "webpack serve --mode development",
+    "build:dist": "npm run build:webpack && npm run build:tsc"
+  },
   "keywords": [
     "live",
     "cut",
     "draw"
   ],
   "description": "Real time design drawing comparison web tool.",
-  "main": "index.js",
+  "main": "dist/main.bundle.js",
   "files": [
-    "index.js"
+    "dist/"
   ],
-  "author": "SystemLight",
+  "bin": {},
+  "author": "SystemLighht",
   "license": "MIT",
   "homepage": "https://github.com/SystemLight/livecut#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SystemLight/livecut.git"
+    "url": "git+https://github.com/SystemLight/livecut"
   },
   "bugs": {
     "url": "https://github.com/SystemLight/livecut/issues"
+  },
+  "engines": {
+    "node": ">=16.15.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.5",
+    "@babel/eslint-parser": "^7.18.2",
+    "@babel/plugin-transform-runtime": "^7.18.5",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/runtime-corejs3": "^7.18.3",
+    "@commitlint/cli": "^17.0.2",
+    "@commitlint/config-conventional": "^17.0.2",
+    "@systemlight/webpack-config": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "babel-loader": "^8.2.5",
+    "copy-webpack-plugin": "^11.0.0",
+    "core-js": "^3.23.3",
+    "eslint": "^8.17.0",
+    "html-webpack-plugin": "^5.5.0",
+    "prettier": "^2.7.0",
+    "terser-webpack-plugin": "^5.3.3",
+    "thread-loader": "^3.0.4",
+    "ts-loader": "^9.3.0",
+    "typescript": "^4.7.3",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.9.2",
+    "webpackbar": "^5.0.2"
   }
 }

@@ -31,5 +31,8 @@
 
     // 使用网址最对比，创建方法二
     LiveCut.iframe('https://bing.com/', {w: 1920, h: 1000});
+  
+    // 网页复刻，4361指定网站高度
+    LiveCut.reprint('https://lol.qq.com/main.shtml', 4361)
 </script>
 ```
